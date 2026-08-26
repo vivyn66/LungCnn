@@ -1,0 +1,250 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lung disease prediction</title>
+    <!-- Google fonts -->
+    <link href="//fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <!-- Template CSS Style link -->
+    <link rel="stylesheet" href="static/css/style-starter.css">
+</head>
+
+<body>
+    <!-- header -->
+    <header id="site-header" class="fixed-top">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <a class="navbar-brand" href="index.html">
+                    Lung disease
+                </a>
+                <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon fa icon-expand fa-bars"></span>
+                    <span class="navbar-toggler-icon fa icon-close fa-times"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarScroll">
+                    <ul class="navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll">
+                        {% include 'menu/home.html'  %}
+                    </ul>
+                </div>
+                <!-- toggle switch for light and dark theme -->
+                <div class="cont-ser-position">
+                    <nav class="navigation">
+                        <div class="theme-switch-wrapper">
+                            <label class="theme-switch" for="checkbox">
+                                <input type="checkbox" id="checkbox">
+                                <div class="mode-container">
+                                    <i class="gg-sun"></i>
+                                    <i class="gg-moon"></i>
+                                </div>
+                            </label>
+                        </div>
+                    </nav>
+                </div>
+                <!-- //toggle switch for light and dark theme -->
+            </nav>
+        </div>
+    </header>
+    <!-- //header -->
+
+    <!-- banner section -->
+    <div class="slider">
+    <div class="slide current">
+        <div class="bg-layer">
+            <div class="content">
+                <h6>AI Lung Disease Detection</h6>
+                <h3>Predict Lung Conditions Instantly</h3>
+                <a href="#" class="btn btn-style mt-4">Learn More</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="bg-layer">
+            <div class="content">
+                <h6>Early Diagnosis with AI</h6>
+                <h3>Detect Pneumonia, TB & More!</h3>
+                <a href="#" class="btn btn-style mt-4">Learn More</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="bg-layer">
+            <div class="content">
+                <h6>Smart Healthcare System</h6>
+                <h3>Upload X-Ray & Get Prediction</h3>
+                <a href="#" class="btn btn-style mt-4">Learn More</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="bg-layer">
+            <div class="content">
+                <h6>Lung Health Monitoring</h6>
+                <h3>AI Powered Disease Analysis</h3>
+                <a href="#" class="btn btn-style mt-4">Learn More</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="buttons">
+        <button id="prev"><i class="fas fa-arrow-left"></i></button>
+        <button id="next"><i class="fas fa-arrow-right"></i></button>
+    </div>
+    <!-- //banner section -->
+
+
+    <!-- footer -->
+    <footer class="w3l-footer py-5">
+        <div class="container pt-4">
+            <div class="text-center mt-4 mb-4" style="max-width: 800px; margin: 0 auto; padding: 15px; background: #fff8f8; border: 1px solid #ffe3e3; border-radius: 5px; color: #cc3333; font-size: 0.9em; line-height: 1.5;">
+                <strong>Educational/Research Disclaimer:</strong> This system is powered by an AI model for educational and research purposes only. It is not a medical diagnostic tool and should not be used as a substitute for professional medical evaluation, diagnosis, or treatment.
+            </div>
+            <div class="copyright-footer text-center mt-5 pt-sm-4 pt-2">
+                <p>&copy; <script>document. write( new Date(). getFullYear() );</script> Lung disease prediction. All rights reserved
+                </p>
+            </div>
+        </div>
+    </footer>
+    <!-- //footer -->
+
+    <!-- Js scripts -->
+    <!-- move top -->
+    <button onclick="topFunction()" id="movetop" title="Go to top">
+        <span class="fas fa-level-up-alt" aria-hidden="true"></span>
+    </button>
+    <script>
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function () {
+            scrollFunction()
+        };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                document.getElementById("movetop").style.display = "block";
+            } else {
+                document.getElementById("movetop").style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+    </script>
+    <!-- //move top -->
+
+    <!-- common jquery plugin -->
+    <script src="static/js/jquery-3.3.1.min.js"></script>
+    <!-- //common jquery plugin -->
+
+    <!-- banner slider -->
+    <script>
+        const slides = document.querySelectorAll(".slide");
+        const nextButton = document.getElementById("next");
+        const prevButton = document.getElementById("prev");
+        const auto = true;
+        const intervalTime = 5000;
+        let slideInterval;
+
+        const nextSlide = () => {
+            const current = document.querySelector(".current");
+            current.classList.remove("current");
+            if (current.nextElementSibling) {
+                current.nextElementSibling.classList.add("current");
+            } else {
+                slides[0].classList.add("current");
+            }
+        };
+
+        const prevSlide = () => {
+            const current = document.querySelector(".current");
+            current.classList.remove("current");
+            if (current.previousElementSibling) {
+                current.previousElementSibling.classList.add("current");
+            } else {
+                slides[slides.length - 1].classList.add("current");
+            }
+        };
+
+        nextButton.addEventListener("click", () => {
+            nextSlide();
+            if (auto) {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, intervalTime);
+            }
+        });
+        prevButton.addEventListener("click", () => {
+            prevSlide();
+            if (auto) {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, intervalTime);
+            }
+        });
+
+        if (auto) {
+            slideInterval = setInterval(nextSlide, intervalTime);
+        }
+    </script>
+    <!-- //banner slider -->
+
+    <!-- theme switch js (light and dark)-->
+    <script src="static/js/theme-change.js"></script>
+    <!-- //theme switch js (light and dark)-->
+
+    <!-- MENU-JS -->
+    <script>
+        $(window).on("scroll", function () {
+            var scroll = $(window).scrollTop();
+
+            if (scroll >= 80) {
+                $("#site-header").addClass("nav-fixed");
+            } else {
+                $("#site-header").removeClass("nav-fixed");
+            }
+        });
+
+        //Main navigation Active Class Add Remove
+        $(".navbar-toggler").on("click", function () {
+            $("header").toggleClass("active");
+        });
+        $(document).on("ready", function () {
+            if ($(window).width() > 991) {
+                $("header").removeClass("active");
+            }
+            $(window).on("resize", function () {
+                if ($(window).width() > 991) {
+                    $("header").removeClass("active");
+                }
+            });
+        });
+    </script>
+    <!-- //MENU-JS -->
+
+    <!-- disable body scroll which navbar is in active -->
+    <script>
+        $(function () {
+            $('.navbar-toggler').click(function () {
+                $('body').toggleClass('noscroll');
+            })
+        });
+    </script>
+    <!-- //disable body scroll which navbar is in active -->
+
+    <!-- bootstrap -->
+    <script src="static/js/bootstrap.min.js"></script>
+    <!-- //bootstrap -->
+    <!-- //Js scripts -->
+</body>
+
+</html>

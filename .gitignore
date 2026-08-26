@@ -1,0 +1,35 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Database dumps
+*.sql
+
+# Training datasets
+Data/
+
+# IDE
+.idea/
+.vscode/
+
+# Runtime uploads
+static/upload/*
+!static/upload/.gitkeep
+
+# Runtime/generated output
+Output/
+
+# Sample/test medical images
+Sample/*
+!Sample/Covid (1).png
+
+# OS files
+Thumbs.db
+desktop.ini

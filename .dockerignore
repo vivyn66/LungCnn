@@ -1,0 +1,11 @@
+venv/
+.git/
+.env
+.env.*
+__pycache__/
+*.pyc
+static/upload/*
+!static/upload/.gitkeep
+Dockerfile
+.dockerignore
+.idea/
