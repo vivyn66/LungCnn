@@ -28,7 +28,15 @@ DB_PORT = int(os.environ.get("DB_PORT", "3306"))
 DB_USER = get_env_or_fail("DB_USER")
 DB_PASSWORD = get_env_or_fail("DB_PASSWORD")
 DB_NAME = get_env_or_fail("DB_NAME")
-SECRET_KEY = get_env_or_fail("SECRET_KEY")
+SECRET_KEY = get_env_or_fail("SECRET_KEY")
+
+
+
+ADMIN_USERNAME = get_env_or_fail("ADMIN_USERNAME")
+
+
+
+ADMIN_PASSWORD = get_env_or_fail("ADMIN_PASSWORD")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -107,7 +115,7 @@ def Heart():
 def adminlogin():
     error = None
     if request.method == 'POST':
-        if request.form['uname'] == 'admin' and request.form['password'] == 'admin':
+        if request.form['uname'] == ADMIN_USERNAME and request.form['password'] == ADMIN_PASSWORD:
 
             conn = get_db_connection()
             # cursor = conn.cursor()
