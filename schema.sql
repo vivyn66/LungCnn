@@ -2,6 +2,8 @@
 -- Excludes all patient, doctor, and administrator credentials/records.
 
 SET FOREIGN_KEY_CHECKS=0;
+SET SESSION sql_require_primary_key=0;
+
 
 --
 -- Table structure for table `admintb`
