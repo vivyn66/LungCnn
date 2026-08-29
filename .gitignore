@@ -34,3 +34,6 @@ Sample/*
 # OS files
 Thumbs.db
 desktop.ini
+
+# Planning artifacts
+implementation_plan.md

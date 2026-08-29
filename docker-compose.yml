@@ -1,3 +1,7 @@
+# NOTE: This docker-compose.yml configuration is strictly for LOCAL DEVELOPMENT
+# and offline database mockups. Production deployment is hosted on Render
+# and connects securely to Aiven MySQL.
+#
 version: '3.8'
 
 services:

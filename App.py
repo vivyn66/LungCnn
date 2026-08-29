@@ -37,25 +37,49 @@ ADMIN_USERNAME = get_env_or_fail("ADMIN_USERNAME")
 
 
 ADMIN_PASSWORD = get_env_or_fail("ADMIN_PASSWORD")
+
+DB_SSL_CA_CONTENT = os.environ.get("DB_SSL_CA_CONTENT")
+DB_SSL_CA_PATH = None
+if DB_SSL_CA_CONTENT:
+    import tempfile
+    try:
+        temp_ca = tempfile.NamedTemporaryFile(delete=False, suffix=".pem", mode='w', encoding='utf-8')
+        temp_ca.write(DB_SSL_CA_CONTENT)
+        temp_ca.close()
+        DB_SSL_CA_PATH = temp_ca.name
+    except Exception as e:
+        raise RuntimeError(f"Startup failure: Failed to write DB_SSL_CA_CONTENT to temporary file: {e}")
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # 5MB limit
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # 5MB limit
+
+@app.before_request
+def restrict_uploads():
+    # Block direct HTTP requests to static/upload/ files
+    if request.path.startswith('/static/upload/'):
+        return "Access Forbidden", 403
+
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
     return '.' in filename and            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def get_db_connection():
-    try:
-        return mysql.connector.connect(
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT,
-            database=DB_NAME
-        )
+def get_db_connection():
+    try:
+        conn_kwargs = {
+            'user': DB_USER,
+            'password': DB_PASSWORD,
+            'host': DB_HOST,
+            'port': DB_PORT,
+            'database': DB_NAME
+        }
+        if DB_SSL_CA_PATH:
+            conn_kwargs['ssl_ca'] = DB_SSL_CA_PATH
+            conn_kwargs['ssl_verify_cert'] = True
+        return mysql.connector.connect(**conn_kwargs)
     except mysql.connector.Error as err:
         app.logger.error(f"Database connection error: {err}")
         raise RuntimeError("Database connection failed.")

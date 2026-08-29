@@ -1,6 +1,6 @@
 # Lung Disease Prediction and Consultation Portal (LungCnn)
 
-LungCnn is an integrated medical software portal containing a **Flask-based web application** and a **Tkinter-based desktop interface**. It categorizes chest X-ray scans into specific lung conditions using a deep learning model, and simulates a patient-to-doctor consultation workflow (booking appointments and managing prescriptions).
+LungCnn is an integrated medical software portal containing a **Flask-based web application** (serving both the backend API and the Jinja2 HTML frontend UI) and an offline **Tkinter-based desktop interface**. It classifies chest X-ray scans into specific lung conditions using a deep learning model, and simulates a patient-to-doctor consultation workflow (booking appointments and managing prescriptions).
 
 ---
 
@@ -8,7 +8,7 @@ LungCnn is an integrated medical software portal containing a **Flask-based web 
 This project is built for educational and research simulation purposes. It demonstrates:
 1. The integration of a trained TensorFlow/Keras convolutional neural network (CNN) within web and desktop applications.
 2. A complete multi-role consultation workflow involving Patients, Doctors, and Administrators.
-3. Production-ready web serving, database query parameterization for security, and containerization.
+3. Production-ready web serving on Render Web Services, database integration with Aiven MySQL, and database query parameterization for security.
 
 ---
 
@@ -62,29 +62,34 @@ This project is built for educational and research simulation purposes. It demon
 
 ## Technology Stack
 * **Python Version:** 3.7.5
-* **Backend Framework:** Flask 2.2.3
-* **Production Server:** Waitress 2.1.2
+* **Backend & UI Framework:** Flask 2.2.3 (integrated Jinja2 template frontend)
+* **Production Web Server:** Waitress 2.1.2
 * **ML Libraries:** TensorFlow/Keras 2.11.0, NumPy 1.21.5
 * **Image Processing:** OpenCV (`opencv-python` 3.4.2.16), Pillow 9.0.1
 * **Database Driver:** `mysql-connector-python` 8.0.33
-* **Frontend:** Jinja2 templates, Bootstrap CSS, jQuery
+* **Frontend Assets:** Jinja2 templates, Bootstrap CSS, jQuery
 
 ---
 
-## Application Architecture
+## Production Deployment Architecture
+
 ```
-┌──────────────┐      HTTP Requests      ┌──────────────┐
-│  Web Client  │◄───────────────────────►│  Flask App   │
-└──────────────┘                         └──────┬───────┘
-                                                │
-                                                ▼  get_db_connection()
-┌──────────────┐      Model Inference    ┌──────────────┐
-│  Keras Model │◄────────────────────────┤  MySQL DB    │
-│(lungmodel.h5)│                         │(1lungdoctordb)│
-└──────────────┘                         └──────────────┘
+┌──────────────┐       HTTPS Requests      ┌──────────────────────┐
+│  Web Client  │◄─────────────────────────►│  Render Web Service  │
+└──────────────┘                           │(Waitress/Flask/Jinja)│
+                                           └──────────┬───────────┘
+                                                      │
+                                                      │  get_db_connection()
+                                                      ▼  (TLS/SSL Encrypted)
+┌──────────────┐                           ┌──────────────────────┐
+│  Keras Model │◄──────────────────────────┤     Aiven MySQL      │
+│(lungmodel.h5)│                           │     (Production)     │
+└──────────────┘                           └──────────────────────┘
 ```
-* **Database Parameterization:** Database query inputs are fully parameterized using placeholders (`%s`) to prevent SQL injection vulnerabilities.
-* **Connection Management:** Connection handling is centralized inside `get_db_connection()` to avoid duplicate connection blocks.
+* **Render Web Service:** Serves both the backend API and the frontend UI directly (same-origin, no separate frontend static hosting required).
+* **Aiven MySQL:** A completely separate managed production database, connected securely over TLS/SSL.
+* **Database Parameterization:** All database query inputs are fully parameterized using placeholders (`%s`) to prevent SQL injection vulnerabilities.
+* **Secure Admin Access:** Verified dynamically via private environment variables `ADMIN_USERNAME` and `ADMIN_PASSWORD` (no default fallbacks or plaintext files committed).
 
 ---
 
@@ -97,10 +102,12 @@ LungCnn/
 ├── App.py                    # Main Flask web application
 ├── Convertor.py              # Script to convert Keras model to TensorFlowJS
 ├── Dockerfile                # Production Docker configuration
+├── init_db.py                # Database schema initialization helper
 ├── Main.py                   # Tkinter-based desktop interface
 ├── model.py                  # Model architecture and training script
 ├── predict.py                # Isolated model prediction tester
 ├── requirements.txt          # Verified dependency manifest
+├── schema.sql                # Sanitized database structural schema
 ├── verify_deployment.py      # Local pre-deployment sanity checks
 ├── verify_routes.py          # E2E integration route test suite
 ├── wsgi.py                   # Waitress production server entrypoint
@@ -121,22 +128,25 @@ LungCnn/
 ---
 
 ## Environment Variables
-The application requires the following environment variables to be configured in a local `.env` file (see `.env.example`):
-* `DB_HOST`: Host address of the MySQL database server.
-* `DB_PORT`: MySQL connection port.
-* `DB_USER`: Username for database connection.
+Configure the following environment variables in the Render Service dashboard:
+* `DB_HOST`: Host name of the Aiven MySQL database server.
+* `DB_PORT`: Database connection port.
+* `DB_USER`: Non-root username for database connection.
 * `DB_PASSWORD`: Password for database connection.
-* `DB_NAME`: Schema name (`1lungdoctordb`).
+* `DB_NAME`: Database name (`lungcnn` or `lungcnn_db`).
 * `SECRET_KEY`: Security signature for Flask sessions.
-* `CORS_ALLOWED_ORIGINS`: Allowed origins (for CORS filtering).
+* `CORS_ALLOWED_ORIGINS`: Allowed origins (optional, defaults to local domain).
+* `ADMIN_USERNAME`: Administrator username.
+* `ADMIN_PASSWORD`: Administrator password.
+* `DB_SSL_CA_CONTENT`: (Optional) The raw text content of Aiven's root CA certificate (which is written to a secure temporary file at runtime to authenticate database TLS connections).
 
 ---
 
-## Local Setup
+## Local Setup & Development
 
-### Prerequisites
+### Local Prerequisites
 * Python 3.7
-* MySQL Server (version 8.0 recommended)
+* MySQL Server (version 8.0 recommended) or Docker Desktop (for Compose mockup)
 
 ### Installation
 1. **Clone the Repository:**
@@ -144,47 +154,50 @@ The application requires the following environment variables to be configured in
    git clone https://github.com/vivyn66/LungCnn.git
    cd LungCnn
    ```
-2. **Setup the Database:**
-   * Create a database named `1lungdoctordb` in your MySQL Server.
-   * Initialize the schema (including `regtb`, `doctortb`, `apptb`, and `drugtb` tables) on your local MySQL server.
-3. **Configure Environment:**
+2. **Configure Environment:**
    * Copy `.env.example` to `.env`.
-   * Open `.env` and fill out your database settings and secret key.
-4. **Install Dependencies:**
+   * Open `.env` and fill out your local database settings, secret keys, and admin credentials.
+3. **Install Dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
----
-
-## How to Run
-
-### Development Mode (Flask Dev Server)
+### Running Locally (Development Mode)
 ```bash
 python App.py
 ```
 > [!WARNING]
 > **Development Server Warning:** Flask's built-in development server and debug mode are strictly for local testing and debugging. They must not be used in a production environment.
 
-### Production Mode (Waitress WSGI Server)
-```bash
-python wsgi.py
-```
-Serves the application via the production-ready Waitress server.
-
-### Desktop App (Tkinter Offline GUI)
+### Running Offline Desktop GUI
 ```bash
 python Main.py
 ```
-Launches the offline desktop window to perform training or predictions.
+
+### Mocking Production Locally (Docker Compose)
+We include a `docker-compose.yml` file to test a production-like multi-container setup locally:
+```bash
+docker-compose up --build -d
+```
+*App is mapped to `http://127.0.0.1:5000` on the local machine.*
 
 ---
 
-## Docker/Deployment Configuration
-The project is containerized for deployment using the included [Dockerfile](Dockerfile):
-* **Base Image:** Runs on Python 3.7 slim.
-* **System Libraries:** Automatically installs graphical libraries required by OpenCV and Pillow.
-* **wsgi.py Command:** Configured to serve the application on port 5000 via Waitress.
+## Production Deployment Sequence (Render + Aiven)
+
+### Step 1: Initialize Database on Aiven
+1. Create a MySQL database instance on Aiven.
+2. Locally configure your `.env` variables to target the remote Aiven database.
+3. Run the sanitized database initialization script to create tables securely:
+   ```bash
+   python init_db.py
+   ```
+
+### Step 2: Configure Render Web Service
+1. Create a new **Web Service** on Render, linking your GitHub repository.
+2. Select **Docker** as the runtime environment.
+3. Under **Advanced Settings**, add the environment variables defined in the Environment Variables section. Note that for `DB_SSL_CA_CONTENT`, you should copy-paste the complete text content of Aiven's root CA certificate (`ca.pem`).
+4. Select **Render Free** (or basic tier) and deploy.
 
 ---
 
@@ -209,19 +222,13 @@ This tests registration, login errors, prediction, doctor specialist search, app
 
 ---
 
-## Limitations
-* **Binary Image Processing:** Preprocessing operates on 3-channel RGB colors but does not segment or annotate bounding regions on the X-ray.
-* **File-Based Upload Cleanup:** Uploaded reports are stored in local directories and require separate scheduled jobs for volume purging.
-
----
-
-## Future Enhancements
-* Migrate backend session storage from local files to a secure production-grade session store (e.g., redis-backed or database-backed sessions).
-* Integrate visual diagnostic overlays (e.g., Grad-CAM heatmaps) to highlight classified chest anomalies.
-* Sync the Tkinter desktop app database actions with the central MySQL application.
+## Upload Storage Limitations on Render Free Tier
+* **Ephemeral Disk:** Because Render's Free Web Service tier filesystem is ephemeral, uploaded scans and prescription reports stored in `static/upload/` will be deleted whenever the container restarts or re-deploys.
+* **Security Interceptor:** To prevent unauthorized direct browsing of uploads, the application implements a Flask request interceptor blocking access to `/static/upload/*` (returning `403 Forbidden`). All file downloads must pass through the authorized `/download?id=<id>` endpoint.
+* **Showcase Mitigation:** This upload workflow operates within the container's temporary disk space for portfolio demonstration purposes. In a true production system, the upload destination should be mapped to an external S3-compatible object storage provider (e.g. AWS S3 or Supabase Storage).
 
 ---
 
 ## Medical and Research Disclaimer
 > [!WARNING]
-> **Educational and Research Use Only:** This application is developed as an educational prototype. It has not been clinically validated, is not a certified medical diagnostic tool, and should not be used as a substitute for professional clinical medical evaluation, diagnosis, or treatment.
+> **Educational and Research Use Only:** This application is developed as an educational prototype. It has not been clinically validated, is not a certified medical diagnostic tool, and should not be used as a substitute for professional clinical medical evaluation, diagnosis, or treatment. Predictions generated by the CNN model are image classifications and not confirmed clinical diagnoses.
