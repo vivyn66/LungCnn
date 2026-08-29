@@ -55,6 +55,10 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # 5MB limit
 
+# Use an absolute runtime path so uploads work on Render/Linux.
+UPLOAD_DIR = os.path.join(app.root_path, 'static', 'upload')
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 @app.before_request
 def restrict_uploads():
     # Block direct HTTP requests to static/upload/ files
@@ -295,7 +299,7 @@ def assigndrug():
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join("static", "upload", filename))
+            file.save(os.path.join(UPLOAD_DIR, filename))
         else:
             flash('Invalid report file type. Only JPG, JPEG, and PNG are allowed.')
             return redirect(url_for('ViewDoctor'))
@@ -429,7 +433,7 @@ def predict():
             return redirect(url_for('ViewDoctor'))
 
         # Save file securely
-        upload_path = os.path.join('static', 'upload', 'Test.jpg')
+        upload_path = os.path.join(UPLOAD_DIR, 'Test.jpg')
         file.save(upload_path)
 
         import warnings
@@ -570,7 +574,7 @@ def download():
     cursor.execute("SELECT * FROM drugtb where id = %s", (id,))
     data = cursor.fetchone()
     if data:
-        filename = "static\\upload\\" + data[7]
+        filename = os.path.join(UPLOAD_DIR, data[7])
 
         return send_file(filename, as_attachment=True)
 
