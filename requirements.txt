@@ -1,7 +1,7 @@
 tensorflow-cpu==2.11.0
 numpy==1.21.5
 Pillow==9.0.1
-opencv-python==3.4.2.16
+opencv-python>=3.4.2.16
 mysql-connector-python==8.0.33
 Flask==2.2.3
 waitress==2.1.2
