@@ -596,9 +596,47 @@ def search():
         return render_template('Notification.html', data=data)
 
 
-@app.route("/health", methods=['GET'])
-def health():
-    return {"status": "UP"}
+@app.route("/health", methods=['GET'])
+
+def health():
+    required_tables = ('admintb', 'apptb', 'doctortb', 'drugtb', 'regtb')
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT DATABASE()")
+        database_name = cur.fetchone()[0]
+
+        placeholders = ','.join(['%s'] * len(required_tables))
+        params = (database_name,) + required_tables
+        cur.execute(
+            "SELECT TABLE_NAME FROM information_schema.TABLES "
+            "WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN (" + placeholders + ")",
+            params
+        )
+        found_tables = {row[0] for row in cur.fetchall()}
+        missing_tables = [table for table in required_tables if table not in found_tables]
+
+        if missing_tables:
+            return {
+                "status": "DOWN",
+                "database": "MISSING_TABLES",
+                "database_name": database_name,
+                "missing_tables": missing_tables
+            }, 503
+
+        return {
+            "status": "UP",
+            "database": "UP",
+            "database_name": database_name,
+            "required_tables": list(required_tables)
+        }
+    except Exception:
+        app.logger.exception("Database health check failed")
+        return {"status": "DOWN", "database": "UNAVAILABLE"}, 503
+    finally:
+        if conn is not None:
+            conn.close()
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
