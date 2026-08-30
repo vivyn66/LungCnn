@@ -8,14 +8,14 @@ LungCnn is an integrated medical software portal containing a **Flask-based web 
 This project is built for educational and research simulation purposes. It demonstrates:
 1. The integration of a trained TensorFlow/Keras convolutional neural network (CNN) within web and desktop applications.
 2. A complete multi-role consultation workflow involving Patients, Doctors, and Administrators.
-3. Production-ready web serving on Render Web Services, database integration with Aiven MySQL, and database query parameterization for security.
+3. Deploying the Flask web application on Render Web Services with Aiven MySQL and parameterized database queries.
 
 ---
 
 ## Features
 
 * **AI Image Classification:** Classifies chest X-ray scans into distinct disease states using a convolutional neural network.
-* **Role-Based Workflows:** Distinct and secure dashboard systems for Patients, Doctors, and Administrators.
+* **Role-Based Workflows:** Separate dashboard flows for Patients, Doctors, and Administrators.
 * **Specialist Search & Directory:** Patients can filter and search for medical specialists based on area of expertise.
 * **Consultation Booking:** Patients can choose a specialist and book appointments.
 * **Digital Prescription Desk:** Doctors can review appointments, prescribe medicines, add guidelines, and upload consultation reports.
@@ -27,20 +27,20 @@ This project is built for educational and research simulation purposes. It demon
 ## User Roles and Capabilities
 
 ### 🌐 Patient
-* **Register & Login:** Create a profile and log in securely.
+* **Register & Login:** Create a profile and log in.
 * **Upload Scan & Predict:** Upload a chest X-ray image to get an AI prediction.
 * **Find a Specialist:** Search the registered specialist directory.
-* **Book Appointments:** Securely book a consultation slot.
+* **Book Appointments:** Book a consultation through the specialist directory.
 * **View Prescription Desk:** Check appointments and download PDF/image reports assigned by the doctor.
 
 ### 🩺 Doctor
-* **Register & Login:** Sign up under a medical specialization and log in.
+* **Register & Login:** Register under a medical specialization and log in.
 * **Review Consultations:** View scheduled appointments booked by patients.
 * **Prescribe Treatments:** Fill out prescriptions (medicine names, custom notes, follow-up dates) and upload report attachments.
 * **Treatment Registry:** Browse a history of all previously prescribed treatments.
 
 ### 🔑 Administrator
-* **Secure Login:** Access via database-checked admin credentials.
+* **Administrator Login:** Access administrator tools using credentials configured through environment variables.
 * **Directory Controls:** View and audit registries of registered patients, doctors, and active prescriptions.
 
 ---
@@ -118,8 +118,7 @@ LungCnn/
 │   ├── css/                  # Compiled styles
 │   ├── images/               # Interface banners and graphics
 │   ├── js/                   # Theme and Bootstrap scripts
-│   └── upload/
-│       └── .gitkeep          # Upload folder placeholder
+│   └── upload/                  # Created at runtime for temporary uploads
 └── templates/                # Jinja2 HTML templates
     ├── menu/                 # Navigation menus
     └── *.html
@@ -133,9 +132,8 @@ Configure the following environment variables in the Render Service dashboard:
 * `DB_PORT`: Database connection port.
 * `DB_USER`: Non-root username for database connection.
 * `DB_PASSWORD`: Password for database connection.
-* `DB_NAME`: Database name (`lungcnn` or `lungcnn_db`).
+* `DB_NAME`: Database name. For the deployed Aiven database, use exactly `lungcnn`.
 * `SECRET_KEY`: Security signature for Flask sessions.
-* `CORS_ALLOWED_ORIGINS`: Allowed origins (optional, defaults to local domain).
 * `ADMIN_USERNAME`: Administrator username.
 * `ADMIN_PASSWORD`: Administrator password.
 * `DB_SSL_CA_CONTENT`: (Optional) The raw text content of Aiven's root CA certificate (which is written to a secure temporary file at runtime to authenticate database TLS connections).
@@ -197,7 +195,7 @@ docker-compose up --build -d
 1. Create a new **Web Service** on Render, linking your GitHub repository.
 2. Select **Docker** as the runtime environment.
 3. Under **Advanced Settings**, add the environment variables defined in the Environment Variables section. Note that for `DB_SSL_CA_CONTENT`, you should copy-paste the complete text content of Aiven's root CA certificate (`ca.pem`).
-4. Select **Render Free** (or basic tier) and deploy.
+4. Choose a plan appropriate for your use case and deploy.
 
 ---
 
@@ -219,6 +217,14 @@ Run [verify_routes.py](verify_routes.py) to simulate a complete patient and doct
 python verify_routes.py
 ```
 This tests registration, login errors, prediction, doctor specialist search, appointment booking, prescription writing, and secure report download.
+
+---
+
+## Prototype Security Notes
+This project is an educational prototype and should not be treated as a production medical system.
+
+* User and doctor passwords are currently stored and compared as plain text. Before any real-world deployment, replace this with password hashing (for example, Werkzeug's password-hashing utilities) and migrate existing records safely.
+* The application currently uses temporary local storage for uploaded files; see the upload limitations below.
 
 ---
 
