@@ -321,55 +321,59 @@ def assigndrug():
     return render_template('DoctorAssignInfo.html', data=data)
 
 
-@app.route("/newuser", methods=['GET', 'POST'])
-def newuser():
-    if request.method == 'POST':
-        name1 = request.form['name']
-        gender1 = request.form['gender']
-        Age = request.form['age']
-        email = request.form['email']
-        pnumber = request.form['phone']
-        address = request.form['address']
-
-        uname = request.form['uname']
-        password = request.form['psw']
-        loc = request.form['loc']
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO regtb VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (name1, gender1, Age, email, pnumber, address, uname, password, loc))
-        conn.commit()
-        conn.close()
-        # return 'file register successfully'
-    flash("Record Saved...!")
-    return render_template('UserLogin.html')
-
-
-@app.route("/newdoctor", methods=['GET', 'POST'])
-def newcoor():
-    if request.method == 'POST':
-        name1 = request.form['name']
-        gender1 = request.form['gender']
-        Age = request.form['age']
-        email = request.form['email']
-        pnumber = request.form['phone']
-        address = request.form['address']
-        special = request.form['special']
-        loc = request.form['loc']
-
-        uname = request.form['uname']
-        password = request.form['psw']
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO doctortb VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (name1, gender1, Age, email, pnumber, address, special, uname, password, loc))
-        conn.commit()
-        conn.close()
-
-    flash('Record Saved...!')
-    return render_template('NewDoctor.html')
-
-
+@app.route("/newuser", methods=['GET', 'POST'])
+
+def newuser():
+    if request.method == 'GET':
+        return render_template('NewUser.html')
+
+    name1 = request.form['name']
+    gender1 = request.form['gender']
+    Age = request.form['age']
+    email = request.form['email']
+    pnumber = request.form['phone']
+    address = request.form['address']
+
+    uname = request.form['uname']
+    password = request.form['psw']
+    loc = request.form['loc']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO regtb VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (name1, gender1, Age, email, pnumber, address, uname, password, loc))
+    conn.commit()
+    conn.close()
+    flash("Record Saved...!")
+    return render_template('UserLogin.html')
+
+
+@app.route("/newdoctor", methods=['GET', 'POST'])
+
+def newcoor():
+    if request.method == 'GET':
+        return render_template('NewDoctor.html')
+
+    name1 = request.form['name']
+    gender1 = request.form['gender']
+    Age = request.form['age']
+    email = request.form['email']
+    pnumber = request.form['phone']
+    address = request.form['address']
+    special = request.form['special']
+    loc = request.form['loc']
+
+    uname = request.form['uname']
+    password = request.form['psw']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO doctortb VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (name1, gender1, Age, email, pnumber, address, special, uname, password, loc))
+    conn.commit()
+    conn.close()
+    flash('Record Saved...!')
+    return render_template('NewDoctor.html')
+
+
 @app.route("/userlogin", methods=['GET', 'POST'])
 def userlogin():
     error = None
