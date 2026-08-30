@@ -20962,3 +20962,16 @@ h5.contact-text {
     color: #8b0000;
     text-decoration: underline;
 }
+
+
+/* Doctor appointment assignment action in the AssignDrugs column */
+.transparent-table td[data-label="AssignDrugs"] a {
+    color: #8b0000;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.transparent-table td[data-label="AssignDrugs"] a:hover {
+    color: #8b0000;
+    text-decoration: underline;
+}
