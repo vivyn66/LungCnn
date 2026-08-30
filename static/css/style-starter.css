@@ -20949,3 +20949,16 @@ h5.contact-text {
 .appt-link:hover {
     text-decoration:underline;
 }
+
+
+/* Doctor appointment assignment action */
+.assign-link {
+    color: #8b0000;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.assign-link:hover {
+    color: #8b0000;
+    text-decoration: underline;
+}
