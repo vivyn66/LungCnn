@@ -1,6 +1,7 @@
 from flask import Flask, render_template, flash, request, session, send_file
 from flask import render_template, redirect, url_for, request
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException
 import mysql.connector
 import sys
 
@@ -647,10 +648,14 @@ def request_entity_too_large(error):
     flash('File is too large. Maximum allowed size is 5MB.')
     return redirect(request.referrer or url_for('homepage'))
 
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Unhandled exception: {e}", exc_info=True)
-    flash("A system error occurred. Please try again later.")
+@app.errorhandler(Exception)
+
+def handle_exception(e):
+    # Do not turn normal HTTP errors such as missing assets or favicon into flash popups.
+    if isinstance(e, HTTPException):
+        return e
+    app.logger.error(f"Unhandled exception: {e}", exc_info=True)
+    flash("A system error occurred. Please try again later.")
     return redirect(url_for('homepage'))
 
 if __name__ == '__main__':
